@@ -7,6 +7,10 @@ How to run ?
 
 ## 1. Create .env file
 
+```
+SAIG_LLM_URL = <input_value_here>
+```
+
 ## 2. Start FastAPI
 
 ```
