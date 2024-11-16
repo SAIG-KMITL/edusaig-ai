@@ -4,10 +4,7 @@ from models.mock_qa import MockQARequest
 import utils.response as res
 import os
 
-router = APIRouter(
-    prefix="/mock-qa",
-    tags=["mock-qa"],
-)
+router = APIRouter()
 
 url = os.getenv("SAIG_LLM_URL")
 model_name = "meta-llama/Meta-Llama-3.1-8B-Instruct"
