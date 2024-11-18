@@ -19,7 +19,7 @@ llm_request = LLMRequest(url=url, model=model_name)
 async def qa(body: SumRequest):
     messages = [
         {"role": "system", "content": "You are a helpful assistant."},
-        {"role": "user", "content": body.content},
+        {"role": "user", "content": f"please help me summarize this text into bullet point : {body.content}"},
     ]
     
     response = llm_request.send_request(messages)
