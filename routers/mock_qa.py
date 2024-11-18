@@ -4,6 +4,9 @@ from models.mock_qa import MockQARequest
 import utils.response as res
 import os
 
+from dotenv import load_dotenv
+load_dotenv(dotenv_path="E:\Ai\edusaig\edusaig-ai\.env")
+
 router = APIRouter()
 
 print("chck")
