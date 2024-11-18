@@ -17,12 +17,9 @@ llm_request = LLMRequest(url=url, model=model_name)
 
 @router.post("/qa", status_code=status.HTTP_200_OK)
 async def qa(body: SumRequest):
-    messages = [
-        {"role": "system", "content": "You are a helpful assistant."},
-        {"role": "user", "content": f"please help me summarize this text into bullet point : {body.content}"},
-    ]
+
     
-    response = llm_request.send_request(messages)
+    response = llm_request.SumText(body.content)
     
     if response:
         return res.success_response_status(
