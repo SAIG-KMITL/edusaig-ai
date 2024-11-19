@@ -40,19 +40,20 @@ class LLMRequest:
             return None
         
     def SumText(self,text: str):
-        text_splitter = RecursiveCharacterTextSplitter(chunk_size=10000,chunk_overlap=500)
+        text_splitter = RecursiveCharacterTextSplitter(chunk_size=12000,chunk_overlap=500)
         docs = text_splitter.create_documents([text])
+        print(f"Total chunks : {len(docs)}")
 
         chunk_sum = []
         for i,chunk in enumerate(docs):
-            prompt = f"please summarize this text into one paragraph in original language and less than 300 words : {chunk}"
+            prompt = f"please summarize this text into one paragraph in the same language as the text and must be less than 300 words : {chunk}"
 
             messages = [
                         {"role": "system", "content": "You are a helpful assistant."},
                         {"role": "user", "content": prompt},
                         ]
             sum = self.send_request(messages)['choices'][0]['message']['content'] 
-            print(sum)
+            #print(sum)
             print(f"chunk {i} done")
             chunk_sum.append(sum)
         
@@ -63,5 +64,6 @@ class LLMRequest:
                         {"role": "user", "content": final_prompt},
         ]
         final_sum = self.send_request(messages)
-        print(final_sum)
+        if(final_sum):
+            print(final_sum['choices'][0]['message']['content'])
         return final_sum
