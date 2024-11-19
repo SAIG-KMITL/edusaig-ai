@@ -15,7 +15,7 @@ url = os.getenv("SAIG_LLM_URL")
 model_name = "meta-llama/Meta-Llama-3.1-8B-Instruct"
 llm_request = LLMRequest(url=url, model=model_name)
 
-@router.post("/ai/generate-pretest/", status_code=status.HTTP_200_OK)
+@router.post("/generate-pretest/", status_code=status.HTTP_200_OK)
 async def qa(body: PreTestRequest):
     messages = [
         {
