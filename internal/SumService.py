@@ -33,7 +33,7 @@ class LLMRequest:
             response.raise_for_status()  # Check for HTTP errors
             
             # Parse and return JSON response if available
-            return response.json()['choices'][0]['message']['content'] if response.status_code == 200 else None
+            return response.json() if response.status_code == 200 else None
             
         except requests.exceptions.RequestException as e:
             print("An error occurred:", e)
@@ -51,8 +51,8 @@ class LLMRequest:
                         {"role": "system", "content": "You are a helpful assistant."},
                         {"role": "user", "content": prompt},
                         ]
-            sum = self.send_request(messages)
-            #print(sum)
+            sum = self.send_request(messages)['choices'][0]['message']['content'] 
+            print(sum)
             print(f"chunk {i} done")
             chunk_sum.append(sum)
         
@@ -63,4 +63,5 @@ class LLMRequest:
                         {"role": "user", "content": final_prompt},
         ]
         final_sum = self.send_request(messages)
+        print(final_sum)
         return final_sum
