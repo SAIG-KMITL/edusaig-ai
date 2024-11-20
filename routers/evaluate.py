@@ -35,8 +35,7 @@ async def qa(body: EvaluateTestRequest):
     if response:
         return res.success_response_status(
             status=status.HTTP_200_OK,
-            message="Generate comment successful",
-            data=content
+            advise=content
         )
     else:
         return res.error_response_status(
