@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from routers import mock_qa
+from routers import Summarize
 
 app = FastAPI(openapi_prefix="/ai")
 app.add_middleware(
@@ -14,4 +15,9 @@ app.add_middleware(
 app.include_router(
     mock_qa.router,
     tags=["mock_qa"]
+)
+
+app.include_router(
+    Summarize.router,
+    tags=["Summarize"]
 )
