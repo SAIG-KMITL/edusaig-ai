@@ -3,15 +3,19 @@ from internal.LLMRequest import LLMRequest
 from models.evaluate import EvaluateTestRequest
 import utils.response as res
 import os
+from dotenv import load_dotenv
+load_dotenv()
 
-router = APIRouter()
+router = APIRouter(
+    tags = ["evaluate-test"]
+)
 
 
 url = os.getenv("SAIG_LLM_URL")
 model_name = "meta-llama/Meta-Llama-3.1-8B-Instruct"
 llm_request = LLMRequest(url=url, model=model_name)
 
-@router.post("/qa", status_code=status.HTTP_200_OK)
+@router.post("/evaluate", status_code=status.HTTP_200_OK)
 async def qa(body: EvaluateTestRequest):
     messages = [
         {
@@ -25,12 +29,14 @@ async def qa(body: EvaluateTestRequest):
     ]
     
     response = llm_request.send_request(messages)
+
+    content = response["choices"][0]["message"]["content"]
     
     if response:
         return res.success_response_status(
             status=status.HTTP_200_OK,
             message="Generate comment successful",
-            data=response
+            data=content
         )
     else:
         return res.error_response_status(
