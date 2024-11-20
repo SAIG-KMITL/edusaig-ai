@@ -3,11 +3,11 @@ from internal.LLMRequest import LLMRequest
 from models.mock_qa import MockQARequest
 import utils.response as res
 import os
+from dotenv import load_dotenv
 
 router = APIRouter()
 
-print("chck")
-
+load_dotenv()
 url = os.getenv("SAIG_LLM_URL")
 model_name = "meta-llama/Meta-Llama-3.1-8B-Instruct"
 llm_request = LLMRequest(url=url, model=model_name)
@@ -24,8 +24,7 @@ async def qa(body: MockQARequest):
     if response:
         return res.success_response_status(
             status=status.HTTP_200_OK,
-            message="Generate comment successful",
-            data=response
+            payload=response
         )
     else:
         return res.error_response_status(
