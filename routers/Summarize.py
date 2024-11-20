@@ -19,13 +19,13 @@ llm_request = LLMRequest(url=url, model=model_name)
 async def sum(body: SumRequest):
 
     
-    response = llm_request.SumText(body.content)
+    response = llm_request.SumText(body.content)["choices"][0]["message"]["content"]
+    output = {"summary":response}
     
     if response:
         return res.success_response_status(
             status=status.HTTP_200_OK,
-            message="Generate comment successful",
-            data=response
+            payload = output
         )
     else:
         return res.error_response_status(

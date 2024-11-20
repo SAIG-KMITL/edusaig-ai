@@ -1,10 +1,10 @@
 from fastapi.responses import JSONResponse
 from fastapi import HTTPException, status
 
-def success_response_status(status: status, message: str, data=None):
+def success_response_status(status: status, payload: dict):
     res = JSONResponse(
         status_code=status,
-        content={"message": message, "data": data},
+        content=payload,
     ) 
     return res
 
