@@ -5,6 +5,8 @@ import utils.response as res
 import os
 import json
 import ast
+from dotenv import load_dotenv
+load_dotenv()
 
 n = 1
 router = APIRouter(
@@ -30,17 +32,45 @@ async def qa(body: PreTestRequest):
     
     response = llm_request.send_request(messages)
     
-    response_data = response.json()
-    # Extract the 'content' part
+    response_data = response
+    
     content = response_data["choices"][0]["message"]["content"]
-    #print(content)
+    
     questions = ast.literal_eval(content)
+
     if response:
+        final_json = []
+        for q in questions:
+            messages_choice = [
+                    {
+                        "role": "system",
+                        "content": "You are a programming professional designed to make a choice and answer for the question user provide by output as JSON response."
+                    },
+                    {
+                        "role": "user",
+                        "content": "Make 4 choices and show the correct choice at the end of the question no need to explain for each of this question " + q + """ in only this JSON object {"question":Question,"choices":{"a":choice A,"b":choice B,"c":choice C,"d":choice D},"answer":correct_choice (Use only lowercase a,b,c,d)}. Please provide the JSON with proper formatting and include the closing brace `}`."""
+                    }
+            ]
+            response_ans = llm_request.send_request(messages_choice)
+
+            content_ans = response_ans["choices"][0]["message"]["content"]
+
+            json_data = json.loads(content_ans)
+
+            if response_ans:
+
+                final_json.append(json_data)
+            else:
+                return res.error_response_status(
+                status=status.HTTP_400_BAD_REQUEST,
+                message="Failed to get a valid response from LLM."
+            )
         return res.success_response_status(
             status=status.HTTP_200_OK,
             message="Generate comment successful",
-            data=questions
+            data=final_json
         )
+    
     else:
         return res.error_response_status(
             status=status.HTTP_400_BAD_REQUEST,
