@@ -164,7 +164,7 @@ class YoutubeDownloader:
 """
 def main():
     downloader = YoutubeDownloader(output_dir="downloads")
-    url = "https://www.youtube.com/watch?v=xG3BLxA3vjU"
+    url = "https://www.youtube.com/watch?v=pTB0EiLXUC8"
     saved_file_path = downloader.download(url, format_type="mp3", quality="best")
     
     if saved_file_path:
