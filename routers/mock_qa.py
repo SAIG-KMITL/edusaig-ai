@@ -6,8 +6,6 @@ import os
 
 router = APIRouter()
 
-print("chck")
-
 url = os.getenv("SAIG_LLM_URL")
 model_name = "meta-llama/Meta-Llama-3.1-8B-Instruct"
 llm_request = LLMRequest(url=url, model=model_name)

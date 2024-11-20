@@ -27,7 +27,7 @@ llm = ChatOpenAI(
 )
 
 def create_profile_analyzer_agent():
-  def profile_analyzer(state: Dict) -> Dict:
+  def profile_analyzer(state: AgentState) -> AgentState:
       user_profile = state['user_data']
       
       prompt = f"""
@@ -84,97 +84,116 @@ def create_profile_analyzer_agent():
           }
       
       state['messages'].append({"role": "profile_analyzer", "content": analysis})
-      print("------------------- create_profile_analyzer_agent -------------------------")
-      print(analysis)
-      print("---------------------------------------------------------------------------")
+      print("create_profile_analyzer_agent done!!")
+    #   print("------------------- create_profile_analyzer_agent -------------------------")
+    #   print(analysis)
+    #   print("---------------------------------------------------------------------------")
       return state
   
   return profile_analyzer
 
 def create_course_matcher_agent():
-  def course_matcher(state: Dict) -> Dict:
-      previous_analysis = state['messages'][-1]["content"]
+  def course_matcher(state: AgentState) -> AgentState:
+    previous_analysis = state['messages'][-1]["content"]
       
-      prompt = f"""
-      **Profile Analysis:**
-      {json.dumps(previous_analysis, indent=2)}
-
-      **Available Courses:**
-      {json.dumps(state['courses'], indent=2)}
-
-      **Task:**
-      Create a structured learning roadmap based on the profile analysis and available courses.
-
-      **Output Format:**
-      START_JSON
-      {{
-          "roadmap": {{
-              "recommended_courses": [
-                  {{
-                      "courseID": "string",
-                      "courseName": "string",
-                      "duration": "string",
-                      "courseLevel": "string",
-                      "priority": integer
-                  }}
-              ],
-              "total_duration": "string",
-              "learning_path": "string"
-          }}
-      }}
-      END_JSON
-
-      **Instructions:**
-      - Ensure the response is enclosed in START_JSON and END_JSON.
-      - Return only the JSON object.
-      - Limit the roadmap to a maximum of 6 courses.
-      - Assign priorities based on course level (Beginner: 1, Intermediate: 2, Advanced: 3, Optional: 4), interests, and importance.
-      - Calculate the total duration by summing up the durations of the recommended courses.
-      - Create a learning path by joining the course names with commas.
-      - Do not include any additional text or code outside the START_JSON and END_JSON delimiters.
-      """
-      messages = [HumanMessage(content=prompt)]
-      response = llm.invoke(messages)
+    filtered_courses = [
+        {
+            "id": course.id,
+            "title": course.title,
+            "description": course.description,
+            "level": course.level,
+            "duration": course.duration,
+            "status": course.status
+        }
+        for course in state['courses']
+    ]
       
-      # Print the raw response for debugging
-      # print(f"Raw Response from LLM: {response.content}")
-      
-      try:
-          json_str = response.content
-          # Extract JSON content enclosed in START_JSON and END_JSON
-          json_match = re.search(r'START_JSON(.*?)END_JSON', json_str, re.DOTALL)
-          if json_match:
-              json_str = json_match.group(1).strip()
-          roadmap = json.loads(json_str)
-      except (json.JSONDecodeError, AttributeError) as error:
-          print(f"Error occurred in create_course_matcher_agent: {error}")
-          print(f"Response content: {response.content}")
-          roadmap = {
-              "roadmap": {
-                  "recommended_courses": [
-                      {
-                          "courseID": "--",
-                          "courseName": "--",
-                          "duration": "--",
-                          "courseLevel": "--",
-                          "priority": 1
-                      }
-                  ],
-                  "total_duration": "--",
-                  "learning_path": "--"
-              }
-          }
-      
-      state['roadmap'] = roadmap
-      print("------------------- create_course_matcher_agent -------------------------")
-      print(state['roadmap'])
-      print("-------------------------------------------------------------------------")
-      return state
-  
+    prompt = f"""
+    **Profile Analysis:**
+    {json.dumps(previous_analysis, indent=2)}
+
+    **Available Courses:**
+    {json.dumps(filtered_courses, indent=2)}
+
+    **Task:**
+    Create a structured learning roadmap based on the profile analysis and available courses.
+
+    **Output Format:**
+    START_JSON
+    {{
+        "roadmap": {{
+            "recommended_courses": [
+                {{
+                    "id": "string",
+                    "title": "string",
+                    "description": "string",
+                    "level": "string",
+                    "duration": integer,
+                    "status": "string",
+                    "priority": integer
+                }}
+            ],
+            "total_duration": integer,
+            "learning_path": "string"
+        }}
+    }}
+    END_JSON
+
+    **Instructions:**
+    - Ensure the response is enclosed in START_JSON and END_JSON.
+    - Return only the JSON object.
+    - Limit the roadmap to a maximum of 8 courses.
+    - Only include courses with status "published".
+    - Assign priorities based on learning progression:
+        * Beginner courses: priority 1
+        * Intermediate courses: priority 2
+        * Advanced courses: priority 3
+        * Optional courses: priority 4
+    - Calculate total_duration as the sum of all recommended course durations in minutes.
+    - Create learning_path by joining the course titles with " → ".
+    - Ensure selected courses match the user's skill level and interests.
+    - Do not include any additional text outside the START_JSON and END_JSON delimiters.
+    """
+    messages = [HumanMessage(content=prompt)]
+    response = llm.invoke(messages)
+
+    try:
+        json_str = response.content
+        json_match = re.search(r'START_JSON(.*?)END_JSON', json_str, re.DOTALL)
+        if json_match:
+            json_str = json_match.group(1).strip()
+        roadmap = json.loads(json_str)
+    except (json.JSONDecodeError, AttributeError) as error:
+        print(f"Error occurred in create_course_matcher_agent: {error}")
+        print(f"Response content: {response.content}")
+        roadmap = {
+            "roadmap": {
+                "recommended_courses": [
+                    {
+                        "id": "--",
+                        "title": "--",
+                        "description": "--",
+                        "level": "--",
+                        "duration": 0,
+                        "status": "published",
+                        "priority": 1
+                    }
+                ],
+                "total_duration": 0,
+                "learning_path": "--"
+            }
+        }
+
+    state['roadmap'] = roadmap
+    print("create_course_matcher_agent done!!")
+    # print("------------------- create_course_matcher_agent -------------------------")
+    # print(state['roadmap'])
+    # print("-------------------------------------------------------------------------")
+    return state
   return course_matcher
 
 def create_roadmap_validator_agent():
-  def roadmap_validator(state: Dict) -> Dict:
+  def roadmap_validator(state: AgentState) -> AgentState:
       roadmap = state['roadmap']
       
       prompt = f"""
@@ -207,14 +226,16 @@ def create_roadmap_validator_agent():
           "validated_roadmap": {{
               "recommended_courses": [
                   {{
-                      "courseID": "string",
-                      "courseName": "string",
-                      "duration": "string",
-                      "courseLevel": "string",
+                      "id": "string",
+                      "title": "string",
+                      "description": "string",
+                      "level": "string",
+                      "duration": integer,
+                      "status": "string",
                       "priority": integer
                   }}
               ],
-              "total_duration": "string",
+              "total_duration": integer,
               "learning_path": "string",
               "path_description": "string"
           }}
@@ -223,10 +244,13 @@ def create_roadmap_validator_agent():
 
       Important:
       - Maintain exact JSON structure
+      - Duration should be in minutes
+      - Status should be "published" for all courses
+      - Learning path should join course titles with " → "
       - Ensure course order reflects real-world learning progression
-      - Verify total duration is realistic
+      - Verify total duration is realistic and matches sum of course durations
       - Provide clear path description explaining the learning journey
-      - Do not include any additional text or code outside the START_JSON and END_JSON delimiters
+      - Do not include any additional text outside the START_JSON and END_JSON delimiters
       """
       messages = [HumanMessage(content=prompt)]
       response = llm.invoke(messages)
@@ -244,23 +268,33 @@ def create_roadmap_validator_agent():
               "validated_roadmap": {
                   "recommended_courses": [
                       {
-                          "courseID": "--",
-                          "courseName": "--",
-                          "duration": "--",
-                          "courseLevel": "--",
+                          "id": "--",
+                          "title": "--",
+                          "description": "--",
+                          "level": "--",
+                          "duration": 0,
+                          "status": "published",
                           "priority": 1
                       }
                   ],
-                  "total_duration": "--",
+                  "total_duration": 0,
                   "learning_path": "--",
                   "path_description": "--"
               }
           }
       
+      try:
+          recommended_courses = validated_roadmap["validated_roadmap"]["recommended_courses"]
+          total_duration = sum(course["duration"] for course in recommended_courses)
+          validated_roadmap["validated_roadmap"]["total_duration"] = total_duration
+      except Exception as e:
+          print(f"Error validating total duration: {e}")
+      
       state['validated_roadmap'] = validated_roadmap
-      print("------------------- create_roadmap_validator_agent ----------------------")
-      print(state['validated_roadmap'])
-      print("-------------------------------------------------------------------------")
+      print("create_roadmap_validator_agent done!!")
+    #   print("------------------- create_roadmap_validator_agent ----------------------")
+    #   print(state['validated_roadmap'])
+    #   print("-------------------------------------------------------------------------")
       return state
   
   return roadmap_validator
@@ -294,6 +328,19 @@ def generate_roadmap(user_input: Dict[str, Any], courses: List[Dict[str, Any]]) 
   # Extract roadmap from the final state
   return final_state["validated_roadmap"]
 
+# -- Example --
+# # for test llm
+# from utils.mock_data import MockDataGenerator
+# import traceback
+
+# mock_gen = MockDataGenerator()
+
+# sample_user = mock_gen.generate_user_data()
+# print("\nSample User Data:")
+# print(json.dumps(sample_user, indent=2))
+
+# sample_courses = mock_gen.generate_course_data(10)
+# print("\nSample Course Data: ", len(sample_courses))
 
 # try:
 #   roadmap = generate_roadmap(sample_user, sample_courses)

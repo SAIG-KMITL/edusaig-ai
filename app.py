@@ -12,5 +12,12 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-app.include_router(mock_qa.router, tags=["mock_qa"])
-app.include_router(roadmap.router, tags=["roadmap"])
+app.include_router(
+    mock_qa.router, 
+    tags=["mock_qa"]
+)
+
+app.include_router(
+    roadmap.router, 
+    tags=["roadmap"]
+)
