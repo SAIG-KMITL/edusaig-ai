@@ -66,8 +66,7 @@ async def qa(body: PreTestRequest):
             )
         return res.success_response_status(
             status=status.HTTP_200_OK,
-            message="Generate comment successful",
-            data=final_json
+            question_json=final_json
         )
     
     else:
