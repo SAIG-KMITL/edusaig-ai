@@ -24,7 +24,7 @@ async def qa(body: EvaluateTestRequest):
         },
         {
             "role": "user",
-            "content": """The question is {} and the correct answer is {} but user answer is {}. Give the user advise on why it's wrong and what should they improve?""".format(body.question, body.correct_choice, body.user_ans)
+            "content": """The question is {} and the correct answer is {} but user answer is {}. Give the user advise on why it's wrong and what should they improve?""".format(body.question, body.correct_answer, body.user_answer)
         }
     ]
     
