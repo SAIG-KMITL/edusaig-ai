@@ -8,7 +8,6 @@ import ast
 from dotenv import load_dotenv
 load_dotenv()
 
-n = 1
 router = APIRouter(
     tags=["pre-test"],
 )
@@ -32,13 +31,23 @@ async def qa(body: PreTestRequest):
     
     response = llm_request.send_request(messages)
     
-    response_data = response
+    # response_data = response
     
-    content = response_data["choices"][0]["message"]["content"]
+    # content = response_data["choices"][0]["message"]["content"]
     
-    questions = ast.literal_eval(content)
+    # questions = ast.literal_eval(content)
 
     if response:
+        try:
+            # Extract and parse the initial list of questions
+            # response_data = response.json()
+            content = response["choices"][0]["message"]["content"]
+            questions = ast.literal_eval(content)  # Safe evaluation of list format
+        except (json.JSONDecodeError, ValueError, SyntaxError) as e:
+            # print("Error parsing questions list:", e)
+            # print("Raw response:", response.text)
+            questions = []  # Fallback to an empty list if parsing fails
+
         final_json = []
         for q in questions:
             messages_choice = [
@@ -53,12 +62,25 @@ async def qa(body: PreTestRequest):
             ]
             response_ans = llm_request.send_request(messages_choice)
 
-            content_ans = response_ans["choices"][0]["message"]["content"]
+            # content_ans = response_ans["choices"][0]["message"]["content"]
 
-            json_data = json.loads(content_ans)
+            # json_data = json.loads(content_ans)
 
             if response_ans:
-                final_json.append(json_data)
+                try:
+                    # Parse the JSON from the response
+                    # response_data_ans = response_ans.json()
+                    content_ans = response_ans["choices"][0]["message"]["content"]
+                    json_data = json.loads(content_ans)  # Attempt to parse JSON directly
+                    final_json.append(json_data)
+                    #print(n, json_data)  # Print and increment counter
+                except (json.JSONDecodeError, ValueError, SyntaxError, KeyError) as e:
+                    # print(f"Error parsing JSON for question {n}: {e}")
+                    # print("Raw response:", response_ans.text)
+                    return res.error_response_status(
+                        status=status.HTTP_400_BAD_REQUEST,
+                        message="Failed to get a valid response from LLM."
+                    )
             else:
                 return res.error_response_status(
                 status=status.HTTP_400_BAD_REQUEST,
