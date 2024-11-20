@@ -58,7 +58,6 @@ async def qa(body: PreTestRequest):
             json_data = json.loads(content_ans)
 
             if response_ans:
-
                 final_json.append(json_data)
             else:
                 return res.error_response_status(
