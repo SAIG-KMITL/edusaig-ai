@@ -2,4 +2,8 @@ langchain
 langgraph 
 langchain_openai
 python-dotenv
-fastapi
+uvicorn[standard]
+requests
+yt-dlp
+ffmpeg-python
+moviepy
