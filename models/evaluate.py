@@ -65,5 +65,6 @@ class EvaluateTestRequest(BaseModel):
     "Solid State Drive",
     "Solid State Drive",
     "To display images",
-    "To increase the computer's memory"
+    "To increase the computer's memory",
+    "To cool down the computer's components" 
     ]
