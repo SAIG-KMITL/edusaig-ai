@@ -4,7 +4,7 @@ from fastapi import HTTPException, status
 def success_response_status(status: status, payload: dict):
     res = JSONResponse(
         status_code=status,
-        content=payload,
+        content=payload
     ) 
     return res
 
