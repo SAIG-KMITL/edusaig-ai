@@ -1,5 +1,5 @@
 from fastapi import APIRouter, status
-from internal.SumService import LLMRequest
+from internal.SumService import Summarization
 from models.SumModels import SumRequest
 import utils.response as res
 import os
@@ -13,7 +13,7 @@ print("chck")
 
 url = os.getenv("SAIG_LLM_URL")
 model_name = "meta-llama/Meta-Llama-3.1-8B-Instruct"
-llm_request = LLMRequest(url=url, model=model_name)
+llm_request = Summarization(url=url, model=model_name)
 
 @router.post("/sum", status_code=status.HTTP_200_OK)
 async def sum(body: SumRequest):

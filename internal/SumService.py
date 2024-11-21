@@ -39,6 +39,8 @@ class LLMRequest:
             print("An error occurred:", e)
             return None
         
+    
+class Summarization(LLMRequest):
     def SumText(self,text: str):
         text_splitter = RecursiveCharacterTextSplitter(chunk_size=12000,chunk_overlap=500)
         docs = text_splitter.create_documents([text])
