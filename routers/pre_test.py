@@ -36,9 +36,9 @@ async def qa(body: PreTestRequest):
                     "content": "Make list of 10 questions which are design to be choices question but without the choices, answer and no number index that are about " + str(t) + "in a" + str(diff_titles[n]) + """difficulty. in array format such as ["question1", "question2", "question3", ...] no need for confirmation message"""
                 }
             ]
-            
+            print(diff_titles[n])
             response = llm_request.send_request(messages)
-            
+            n = n + 1
             if response:
                 try:
                     content = response["choices"][0]["message"]["content"]
