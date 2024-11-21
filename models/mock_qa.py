@@ -1,5 +1,6 @@
-from pydantic import BaseModel, Field
-from typing import List, Optional
+from pydantic import BaseModel
+from typing import List, Dict
 
 class MockQARequest(BaseModel):
-    content: str = "แนะนำที่เที่ยวกรุงเทพหน่อย"
+    chapter_summary: str
+    chat_history: List[Dict[str, str]]
