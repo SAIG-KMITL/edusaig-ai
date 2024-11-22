@@ -2,7 +2,7 @@ import yt_dlp
 import os
 from pathlib import Path
 import re
-from FFmpegSetup import FFmpegSetup
+from internal.FFmpegSetup import FFmpegSetup
 
 
 class YoutubeDownloader:
