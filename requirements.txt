@@ -4,3 +4,5 @@ requests
 yt-dlp
 ffmpeg-python
 moviepy
+transformers 
+torchaudio
