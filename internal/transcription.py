@@ -4,6 +4,8 @@ import torch
 import librosa
 import numpy as np
 import os
+import soundfile as sf
+from pathlib import Path
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -57,10 +59,7 @@ def transcribe_chunk(chunk, language='en', filename="downloads/temp_chunk.mp3"):
     Returns:
         str: Transcribed text from the audio chunk
     """
-    import numpy as np
-    import soundfile as sf
-    import requests
-    from pathlib import Path
+    
 
     if not isinstance(chunk, np.ndarray):
         chunk_np = chunk.squeeze().numpy()
