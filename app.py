@@ -3,7 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from routers import evaluate
 from routers import pre_test
-from routers import mock_qa
+from routers import mock_qa 
+from routers import asr
 from routers import roadmap
 from routers import Summarize
 
@@ -20,6 +21,8 @@ app.include_router(
     mock_qa.router, 
     tags=["mock_qa"]
 )
+
+app.include_router(asr.router)
 
 app.include_router(
     roadmap.router, 
