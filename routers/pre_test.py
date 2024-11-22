@@ -84,7 +84,7 @@ async def qa(body: PreTestRequest):
             )
         return res.success_response_status(
                 status=status.HTTP_200_OK,
-                question_json=final_json
+                payload=final_json
             )
     else:
         return res.error_response_status(
