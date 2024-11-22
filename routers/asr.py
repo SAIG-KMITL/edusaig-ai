@@ -2,12 +2,13 @@ from fastapi import APIRouter, HTTPException
 from utils.response import success_response_status, error_response_status
 from internal.YoutubeDownloader import YoutubeDownloader  
 from internal.transcription import transcribe_audio
+from models.asr import ASRRequest
 import traceback
 
 router = APIRouter()
 
 @router.post("/asr")
-async def asr_youtube(url: str):
+async def asr_youtube(body: ASRRequest):
     """
     Endpoint to download audio from YouTube, transcribe it, and return the transcription.
     """
@@ -16,7 +17,7 @@ async def asr_youtube(url: str):
         downloader = YoutubeDownloader(output_dir="downloads")
         
         # Download audio as MP3
-        result = downloader.download(url, format_type="mp3")
+        result = downloader.download(body.url, format_type="mp3")
         
         #result = "/Users/mattew/Desktop/saig_work/edusaig-ai/downloads/How_Elon_Musk_Became_Trump's_Super_Fan.mp3"
         
@@ -24,7 +25,7 @@ async def asr_youtube(url: str):
             file_path = result
             
             # Call the transcription logic
-            transcription = transcribe_audio(file_path)
+            transcription = transcribe_audio(file_path, language=body.language)
             
             return success_response_status(200, {
                 "file_path": file_path,
