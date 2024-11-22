@@ -48,7 +48,7 @@ class Summarization(LLMRequest):
 
         chunk_sum = []
         for i,chunk in enumerate(docs):
-            prompt = f"please summarize this text into one paragraph in the same language as the text input and the summarze must be less than 300 words : {chunk}"
+            prompt = f"Please summarize this text into one paragraph in the same language as the text and the summarize must be less than 300 words : {chunk}"
 
             messages = [
                         {"role": "system", "content": "You are a helpful assistant."},
