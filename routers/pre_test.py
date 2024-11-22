@@ -21,7 +21,6 @@ async def qa(body: PreTestRequest):
     response_topic = body.topics
     topic_titles = [topic.title for topic in response_topic]
     diff_titles = [diff.level for diff in response_topic]
-    occu = body.occupation
     n = 0
     if response_topic:
         final_questions = []
