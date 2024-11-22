@@ -18,7 +18,6 @@ llm_request = LLMRequest(url=url, model=model_name)
 @router.post("/evaluate", status_code=status.HTTP_200_OK)
 async def qa(body: EvaluateTestRequest):
     eva = ""
-    n = 0
     questions = body.question
     correct = body.correct_answer
     ans = body.user_answer
@@ -29,17 +28,16 @@ async def qa(body: EvaluateTestRequest):
             "answer": ans[i]
         }
         eva = eva + '\n' + str(cur)
-    #print(eva)
     messages = [
         {
             "role": "system",
-            "content": "You are a professional assistance and a professional programming tutor designed to evaluate user answer and give user whose are like student a short polite advise not longer than 750 words on where they might be wrong and how to improve."
+            "content": "You are a professional assistance and a professional programming tutor designed to evaluate user answer and give user whose are like student **in only one short polite advise paragraph not longer than 750 words** on where they might be wrong and how to improve."
         },
         {
             "role": "user",
             "content": "From this list of question that include the correct aswer and what user have answer. Give user an advise for each topic in a short paragraph on how they can improve their performance and what course topic should they focus on learning." + eva + """
             Output in this format:
-            From the test result...
+            From the test result...(What user miss and how to improve)
 
             Recommend topic that you should review on
             -
@@ -56,7 +54,7 @@ async def qa(body: EvaluateTestRequest):
     if response:
         return res.success_response_status(
             status=status.HTTP_200_OK,
-            advise=content
+            payload=content
         )
     else:
         return res.error_response_status(
