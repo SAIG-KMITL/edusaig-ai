@@ -54,10 +54,12 @@ class Summarization(LLMRequest):
                         {"role": "system", "content": "You are a helpful assistant."},
                         {"role": "user", "content": prompt},
                         ]
-            sum = self.send_request(messages)['choices'][0]['message']['content'] 
+            sum = self.send_request(messages)
+            if(not sum):
+               return None
             #print(sum)
             print(f"chunk {i} done")
-            chunk_sum.append(sum)
+            chunk_sum.append(sum['choices'][0]['message']['content'] )
         
         combine_text = " ".join(chunk_sum)
         final_prompt = f"please summarize this text into bullet point: {combine_text}"

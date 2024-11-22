@@ -19,10 +19,11 @@ llm_request = Summarization(url=url, model=model_name)
 async def sum(body: SumRequest):
 
     
-    response = llm_request.SumText(body.content)["choices"][0]["message"]["content"]
-    output = {"summary":response}
+    response = llm_request.SumText(body.content)
+    
     
     if response:
+        output = {"summary":response["choices"][0]["message"]["content"]}
         return res.success_response_status(
             status=status.HTTP_200_OK,
             payload = output
