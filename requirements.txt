@@ -6,3 +6,5 @@ ffmpeg-python
 moviepy
 transformers 
 torchaudio
+librosa
+numpy
