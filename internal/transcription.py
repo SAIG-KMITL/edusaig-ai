@@ -1,31 +1,38 @@
 import requests
 import torchaudio
 import torch
+import librosa
+import numpy as np
+import os
 
+from dotenv import load_dotenv
+load_dotenv()
 # Hugging Face API details
-API_URL = "https://api-inference.huggingface.co/models/openai/whisper-large-v3"
-API_KEY = "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"  # Replace with your actual API key
+API_URL = "https://api-inference.huggingface.co/models/openai/whisper-large-v3-turbo"
+API_KEY = os.getenv("apiKey")  # Replace with your actual API key
 
 headers = {"Authorization": f"Bearer {API_KEY}"}
 
 def preprocess_audio(audio_path):
     """
-    Load and preprocess the audio file.
+    Load and preprocess the audio file using Librosa.
     """
-    waveform, sample_rate = torchaudio.load(audio_path)
+    waveform, sample_rate = librosa.load(audio_path, sr=None)
 
-    # Resample to 16000 Hz if necessary
     if sample_rate != 16000:
-        resampler = torchaudio.transforms.Resample(orig_freq=sample_rate, new_freq=16000)
-        waveform = resampler(waveform)
+        waveform = librosa.resample(waveform, orig_sr=sample_rate, target_sr=16000)
+        sample_rate = 16000
 
-    # Mix down to mono if stereo
-    if waveform.shape[0] == 2:
-        waveform = torch.mean(waveform, dim=0, keepdim=True)
+    if waveform.ndim == 1:  # Mono
+        waveform = np.expand_dims(waveform, axis=0)
+    elif waveform.ndim == 2:  # Stereo
+        waveform = np.mean(waveform, axis=0, keepdims=True)  # Mix down to mono
+
+    waveform = torch.tensor(waveform, dtype=torch.float32)
 
     return waveform
 
-def split_audio(waveform, chunk_length_seconds=30, overlap_seconds=1):
+def split_audio(waveform, chunk_length_seconds=20, overlap_seconds=1):
     """
     Split audio into overlapping chunks.
     """
@@ -39,20 +46,37 @@ def split_audio(waveform, chunk_length_seconds=30, overlap_seconds=1):
 
     return chunks
 
-def transcribe_chunk(chunk):
+def transcribe_chunk(chunk, filename="downloads/temp_chunk.mp3"):
     """
-    Transcribe a single audio chunk using the Hugging Face API.
+    Transcribe a single audio chunk by saving it to a file and sending it to the Hugging Face API.
+    
+    Args:
+        chunk: Audio chunk (numpy array or tensor)
+        filename: Path to save temporary MP3 file
+        
+    Returns:
+        str: Transcribed text from the audio chunk
     """
-    chunk_np = chunk.squeeze().numpy()
-    payload = {
-        "inputs": chunk_np.tolist(),
-        "parameters": {"sampling_rate": 16000}
-    }
+    import numpy as np
+    import soundfile as sf
+    import requests
+    from pathlib import Path
 
-    response = requests.post(API_URL, headers=headers, json=payload)
+    if not isinstance(chunk, np.ndarray):
+        chunk_np = chunk.squeeze().numpy()
+    else:
+        chunk_np = chunk
+
+    # Save the chunk as a temporary WAV file first
+    temp_wav = filename.replace('.mp3', '.wav')
+    sf.write(temp_wav, chunk_np, samplerate=16000)
+
+    with open(temp_wav, "rb") as f:
+        data = f.read()
+    response = requests.post(API_URL, headers=headers, data=data)
     response.raise_for_status()
-
     result = response.json()
+      
     return result.get("text", "")
 
 def transcribe_audio(audio_path):
@@ -60,16 +84,21 @@ def transcribe_audio(audio_path):
     Transcribe an audio file using Hugging Face Whisper API.
     """
     # Preprocess the audio
+    print("Start preprocess_audio")
     waveform = preprocess_audio(audio_path)
+    print("Finish preprocess_audio")
 
     # Split audio into chunks
+    print("start split_audio")
     audio_chunks = split_audio(waveform)
+    print("Finish split_audio")
 
     # Transcribe each chunk and combine results
     transcriptions = []
     for i, chunk in enumerate(audio_chunks):
         print(f"Processing chunk {i + 1}/{len(audio_chunks)}...")
         transcription = transcribe_chunk(chunk)
+        print("Result: ", transcription)
         transcriptions.append(transcription)
 
     # Combine all transcriptions into one
