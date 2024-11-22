@@ -12,9 +12,9 @@ class User(BaseModel):
     fullname: str = "John Doe"
 
 class Occupation(BaseModel):
-    id: str = "string"
-    title: str = "string"
-    description: str = "string"
+    id: str = "oc-001"
+    title: str = "Computer Engineer"
+    description: str = "Computer Engineering combines hardware and software design to create and optimize computing systems."
     createdAt: datetime = datetime(2024, 11, 20, 15, 1, 56, 406000)
     updatedAt: datetime = datetime(2024, 11, 20, 15, 1, 56, 406000)
 

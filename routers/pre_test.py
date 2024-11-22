@@ -21,6 +21,7 @@ async def qa(body: PreTestRequest):
     response_topic = body.topics
     topic_titles = [topic.title for topic in response_topic]
     diff_titles = [diff.level for diff in response_topic]
+    occu = body.occupation
     n = 0
     if response_topic:
         final_questions = []
@@ -33,11 +34,12 @@ async def qa(body: PreTestRequest):
                 },
                 {
                     "role": "user",
-                    "content": "Make list of 10 questions which are design to be choices question but without the choices, answer and no number index that are about " + str(t) + "in a" + str(diff_titles[n]) + """difficulty. in array format such as ["question1", "question2", "question3", ...] no need for confirmation message"""
+                    "content": "User want to be {}.Make list of 10 questions which are design to be choices question but without the choices, answer and no number index that are about ".format(body.occupation.title) + str(t) + "in a" + str(diff_titles[n]) + """difficulty. in array format such as ["question1", "question2", "question3", ...] no need for confirmation message"""
                 }
             ]
-            print(diff_titles[n])
+ 
             response = llm_request.send_request(messages)
+            
             n = n + 1
             if response:
                 try:
@@ -75,6 +77,7 @@ async def qa(body: PreTestRequest):
                 except (json.JSONDecodeError, ValueError, SyntaxError, KeyError) as e:
                     print(f"Error parsing JSON")
                     print("Raw response:", response_ans)
+                    response_ans = llm_request.send_request(messages_choice)
             else:
                 return res.error_response_status(
                 status=status.HTTP_400_BAD_REQUEST,
