@@ -6,9 +6,6 @@ import utils.response as res
 import os
 from dotenv import load_dotenv
 
-from dotenv import load_dotenv
-load_dotenv(dotenv_path="E:\Ai\edusaig\edusaig-ai\.env")
-
 router = APIRouter()
 
 load_dotenv()
