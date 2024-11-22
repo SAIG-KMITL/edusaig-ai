@@ -1,4 +1,7 @@
-fastapi
+langchain 
+langgraph 
+langchain_openai
+python-dotenv
 uvicorn[standard]
 requests
 yt-dlp
