@@ -5,6 +5,7 @@ from routers import evaluate
 from routers import pre_test
 from routers import mock_qa
 from routers import roadmap
+from routers import Summarize
 
 app = FastAPI(openapi_prefix="/ai")
 app.add_middleware(
@@ -33,4 +34,9 @@ app.include_router(
 app.include_router(
     evaluate.router,
     tags=["evaluate-test"]
+)
+
+app.include_router(
+    Summarize.router,
+    tags=["Summarize"]
 )
