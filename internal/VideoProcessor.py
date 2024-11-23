@@ -3,7 +3,7 @@ import requests
 from internal.FFmpegSetup import FFmpegSetup
 from pathlib import Path
 import os
-
+import traceback
 class VideoProcessor:
     """
     A class for downloading MP4 videos and extracting audio as MP3 files.
@@ -70,6 +70,8 @@ class VideoProcessor:
             
             return True, f"MP4 file successfully downloaded to {mp4_path}.", mp4_path
         except requests.exceptions.RequestException as e:
+            print(e)
+            traceback.print_exc()
             return False, f"Failed to download the MP4 file: {e}", None
 
     def extract_mp3_from_mp4(self, mp4_path, video_name):
@@ -94,13 +96,14 @@ class VideoProcessor:
             
             # # Extract the audio and save it as an MP3
             # video.audio.write_audiofile(mp3_path)
-
+            print("Start extract mp3...")
             import subprocess
 
             # Full path to ffmpeg executable
             # ffmpeg_path = r'C:\path\to\ffmpeg\bin\ffmpeg.exe'  # Change this to the correct path
 
             # Run ffmpeg command using subprocess
+            print("Start subprocess...")
             subprocess.call([self.ffmpeg_location, '-i', mp4_path, '-vn', mp3_path])
             return True, f"Audio successfully extracted to {mp3_path}.", mp3_path
         except Exception as e:
