@@ -66,7 +66,7 @@ async def asr_public(body: ASRRequest):
         else:
             # Handle download errors
             
-            return error_response_status(500, result.get("message", "Unknown error occurred during download."))
+            return error_response_status(500, "Unknown error occurred during download.")
     except Exception as e:
         traceback.print_exc()
         return error_response_status(500, f"Error: {str(e)}")
