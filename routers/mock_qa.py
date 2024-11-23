@@ -40,9 +40,11 @@ async def qa(body: MockQARequest):
         # Extract the answer from the response
         if response and "choices" in response and len(response["choices"]) > 0:
             # Return the content of the assistant's message (plain string)
-            answer = response["choices"][0]["message"]["content"]
-            return answer  # Return only the answer as a string
-
+            output = {"answer":response["choices"][0]["message"]["content"]}
+            return res.success_response_status(
+                status=status.HTTP_200_OK,
+                payload = output
+            )
         else:
             return res.error_response_status(
                 status=status.HTTP_400_BAD_REQUEST,
