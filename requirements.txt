@@ -12,3 +12,4 @@ torchaudio
 librosa
 numpy
 soundfile
+fastapi

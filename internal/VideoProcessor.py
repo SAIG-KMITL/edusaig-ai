@@ -1,15 +1,26 @@
 import requests
-from moviepy.editor import VideoFileClip
+# from moviepy.editor import VideoFileClip
+from internal.FFmpegSetup import FFmpegSetup
 from pathlib import Path
-
+import os
+import traceback
 class VideoProcessor:
     """
     A class for downloading MP4 videos and extracting audio as MP3 files.
     """
     def __init__(self, output_dir="downloads"):
-        self.output_dir = Path(output_dir)
-        self.output_dir.mkdir(exist_ok=True)  # Create the directory if it doesn't exist
+        self.output_dir = output_dir
+        Path(output_dir).mkdir(exist_ok=True)
         
+        script_dir = Path(__file__).parent # edusaig-ai\internal
+        ffmpeg_setup = FFmpegSetup()
+        setup_location = ffmpeg_setup.setup_ffmpeg(script_dir) 
+        self.ffmpeg_location = os.path.join(setup_location, r'bin/ffmpeg.exe')
+        self.ffprobe_location = os.path.join(setup_location, r'bin/ffprobe.exe')
+        print("Exist: ", os.path.exists(self.ffmpeg_location), os.path.exists(self.ffprobe_location))
+        os.chmod(self.ffmpeg_location, 0o777)
+        os.chmod(self.ffprobe_location, 0o777)
+
     def get_mp4_save_path(self, video_name):
         """
         Generate the full path to save the MP4 file.
@@ -20,7 +31,7 @@ class VideoProcessor:
         Returns:
             Path: Full path where the MP4 file will be saved.
         """
-        return self.output_dir / f"{video_name}.mp4"
+        return self.output_dir + f"/{video_name}.mp4"
     
     def get_mp3_save_path(self, video_name):
         """
@@ -32,7 +43,7 @@ class VideoProcessor:
         Returns:
             Path: Full path where the MP3 file will be saved.
         """
-        return self.output_dir / f"{video_name}.mp3"
+        return self.output_dir + f"/{video_name}.mp3"
 
     def download_mp4(self, url, video_name):
         """
@@ -62,6 +73,8 @@ class VideoProcessor:
             
             return True, f"MP4 file successfully downloaded to {mp4_path}.", mp4_path
         except requests.exceptions.RequestException as e:
+            print(e)
+            traceback.print_exc()
             return False, f"Failed to download the MP4 file: {e}", None
 
     def extract_mp3_from_mp4(self, mp4_path, video_name):
@@ -81,14 +94,25 @@ class VideoProcessor:
         mp3_path = self.get_mp3_save_path(video_name)  # Get the save path for MP3
         
         try:
-            # Load the video file
-            video = VideoFileClip(mp4_path)
+            # # Load the video file
+            # video = VideoFileClip(mp4_path)
             
-            # Extract the audio and save it as an MP3
-            video.audio.write_audiofile(mp3_path)
-            
+            # # Extract the audio and save it as an MP3
+            # video.audio.write_audiofile(mp3_path)
+            print("Start extract mp3...")
+            import subprocess
+
+            # Full path to ffmpeg executable
+            # ffmpeg_path = r'C:\path\to\ffmpeg\bin\ffmpeg.exe'  # Change this to the correct path
+
+            # Run ffmpeg command using subprocess
+            print("Start subprocess...")
+            subprocess.call(['wine', self.ffmpeg_location, '-i', mp4_path, '-vn', mp3_path])
+            print("Finish subprocess")
             return True, f"Audio successfully extracted to {mp3_path}.", mp3_path
         except Exception as e:
+            print(e)
+            traceback.print_exc()
             return False, f"Failed to extract MP3: {e}", None
 
     def download_and_extract_audio(self, url, video_name):
