@@ -1,15 +1,23 @@
 import requests
-from moviepy.editor import VideoFileClip
+# from moviepy.editor import VideoFileClip
+from internal.FFmpegSetup import FFmpegSetup
 from pathlib import Path
+import os
 
 class VideoProcessor:
     """
     A class for downloading MP4 videos and extracting audio as MP3 files.
     """
     def __init__(self, output_dir="downloads"):
-        self.output_dir = Path(output_dir)
-        self.output_dir.mkdir(exist_ok=True)  # Create the directory if it doesn't exist
+        self.output_dir = output_dir
+        Path(output_dir).mkdir(exist_ok=True)
         
+        script_dir = Path(__file__).parent # edusaig-ai\internal
+        ffmpeg_setup = FFmpegSetup()
+        setup_location = ffmpeg_setup.setup_ffmpeg(script_dir) 
+        self.ffmpeg_location = os.path.join(setup_location, r'bin/ffmpeg.exe')
+        self.ffprobe_location = os.path.join(setup_location, r'bin/ffprobe.exe')
+
     def get_mp4_save_path(self, video_name):
         """
         Generate the full path to save the MP4 file.
@@ -20,7 +28,7 @@ class VideoProcessor:
         Returns:
             Path: Full path where the MP4 file will be saved.
         """
-        return self.output_dir / f"{video_name}.mp4"
+        return self.output_dir + f"/{video_name}.mp4"
     
     def get_mp3_save_path(self, video_name):
         """
@@ -32,7 +40,7 @@ class VideoProcessor:
         Returns:
             Path: Full path where the MP3 file will be saved.
         """
-        return self.output_dir / f"{video_name}.mp3"
+        return self.output_dir + f"/{video_name}.mp3"
 
     def download_mp4(self, url, video_name):
         """
@@ -81,12 +89,19 @@ class VideoProcessor:
         mp3_path = self.get_mp3_save_path(video_name)  # Get the save path for MP3
         
         try:
-            # Load the video file
-            video = VideoFileClip(mp4_path)
+            # # Load the video file
+            # video = VideoFileClip(mp4_path)
             
-            # Extract the audio and save it as an MP3
-            video.audio.write_audiofile(mp3_path)
-            
+            # # Extract the audio and save it as an MP3
+            # video.audio.write_audiofile(mp3_path)
+
+            import subprocess
+
+            # Full path to ffmpeg executable
+            # ffmpeg_path = r'C:\path\to\ffmpeg\bin\ffmpeg.exe'  # Change this to the correct path
+
+            # Run ffmpeg command using subprocess
+            subprocess.call([self.ffmpeg_location, '-i', mp4_path, '-vn', mp3_path])
             return True, f"Audio successfully extracted to {mp3_path}.", mp3_path
         except Exception as e:
             return False, f"Failed to extract MP3: {e}", None
