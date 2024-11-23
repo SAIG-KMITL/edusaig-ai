@@ -1,0 +1,15 @@
+langchain 
+langgraph 
+langchain_openai
+python-dotenv
+uvicorn[standard]
+requests
+yt-dlp
+ffmpeg-python
+moviepy
+transformers 
+torchaudio
+librosa
+numpy
+soundfile
+fastapi

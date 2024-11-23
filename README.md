@@ -9,9 +9,18 @@ How to run ?
 
 ```
 SAIG_LLM_URL = <input_value_here>
+SAIG_LLM_MODEL = meta-llama/Meta-Llama-3.1-8B-Instruct
+HUGGING_FACE_API_KEY = <input_value_here>
+HUGGING_FACE_ASR_MODEL = https://api-inference.huggingface.co/models/openai/whisper-large-v3-turbo
 ```
 
-## 2. Start FastAPI
+## 2. Install Dependecies
+
+```
+pip install -r requirements.txt
+```
+
+## 3. Start FastAPI
 
 ```
 uvicorn app:app --reload
