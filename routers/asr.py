@@ -50,9 +50,10 @@ async def asr_public(body: ASRRequest):
         processor = VideoProcessor()
 
         video_name = "video"  # The base name for the video file (without extension)
-        
+        print("Start download and extract ...")
         status, message, audio_file_path = processor.download_and_extract_audio(body.url, video_name)
 
+        print("Result after load and extract:", status, message, audio_file_path)
         if audio_file_path:
             file_path = audio_file_path
             

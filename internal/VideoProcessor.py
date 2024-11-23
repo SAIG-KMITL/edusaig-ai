@@ -105,8 +105,11 @@ class VideoProcessor:
             # Run ffmpeg command using subprocess
             print("Start subprocess...")
             subprocess.call([self.ffmpeg_location, '-i', mp4_path, '-vn', mp3_path])
+            print("Finish subprocess")
             return True, f"Audio successfully extracted to {mp3_path}.", mp3_path
         except Exception as e:
+            print(e)
+            traceback.print_exc()
             return False, f"Failed to extract MP3: {e}", None
 
     def download_and_extract_audio(self, url, video_name):
