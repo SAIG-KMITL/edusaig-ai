@@ -17,6 +17,9 @@ class VideoProcessor:
         setup_location = ffmpeg_setup.setup_ffmpeg(script_dir) 
         self.ffmpeg_location = os.path.join(setup_location, r'bin/ffmpeg.exe')
         self.ffprobe_location = os.path.join(setup_location, r'bin/ffprobe.exe')
+        print("Exist: ", os.path.exists(self.ffmpeg_location), os.path.exists(self.ffprobe_location))
+        os.chmod(self.ffmpeg_location, 0o777)
+        os.chmod(self.ffprobe_location, 0o777)
 
     def get_mp4_save_path(self, video_name):
         """
@@ -104,7 +107,7 @@ class VideoProcessor:
 
             # Run ffmpeg command using subprocess
             print("Start subprocess...")
-            subprocess.call([self.ffmpeg_location, '-i', mp4_path, '-vn', mp3_path])
+            subprocess.call(['wine', self.ffmpeg_location, '-i', mp4_path, '-vn', mp3_path])
             print("Finish subprocess")
             return True, f"Audio successfully extracted to {mp3_path}.", mp3_path
         except Exception as e:

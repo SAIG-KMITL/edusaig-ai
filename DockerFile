@@ -22,6 +22,7 @@ RUN apt update && apt install -y \
     ffmpeg \
     libffi-dev \
     # openssl-dev \
+    wine \
     bash \
     curl \
     make \
