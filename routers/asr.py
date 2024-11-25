@@ -18,7 +18,6 @@ async def asr(body: ASRRequest):
         custom_temp_dir = "downloads/"
         os.makedirs(custom_temp_dir, exist_ok=True)
 
-        video_name = "video"  # The base name for the video file (without extension)
         print("Start download and extract ...")
 
         # Use a temporary file in the custom directory

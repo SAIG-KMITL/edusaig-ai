@@ -68,8 +68,12 @@ def transcribe_chunk(chunk, language='en'):
     else:
         chunk_np = chunk
 
+    # Specify the custom temporary directory
+    custom_temp_dir = "downloads/"
+    os.makedirs(custom_temp_dir, exist_ok=True)
+
     # Create a temporary WAV file
-    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_wav:
+    with tempfile.NamedTemporaryFile(suffix=".wav", dir=custom_temp_dir, delete=False) as temp_wav:
         temp_wav_name = temp_wav.name
         print("temp_wav_name: ", temp_wav_name)
         sf.write(temp_wav_name, chunk_np, samplerate=16000)
