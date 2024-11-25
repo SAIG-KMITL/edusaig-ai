@@ -47,13 +47,13 @@ class VideoProcessor:
         """
         return self.output_dir + f"/{video_name}.mp3"
 
-    def download_mp4(self, url, video_name):
+    def download_mp4(self, url, mp4_path):
         """
         Downloads an MP4 file from a URL and saves it locally in the output directory.
 
         Args:
             url (str): The URL of the .mp4 file.
-            video_name (str): The name of the video (used for the filename).
+            video_path (str): The name of the video (used for the filename).
 
         Returns:
             tuple: (status, message, file_path)
@@ -61,8 +61,6 @@ class VideoProcessor:
                 message (str): Description of the result.
                 file_path (Path): The path where the file was saved.
         """
-        mp4_path = self.get_mp4_save_path(video_name)  # Get the save path
-        
         try:
             # Send a GET request to the URL
             response = requests.get(url, stream=True)
@@ -79,7 +77,7 @@ class VideoProcessor:
             traceback.print_exc()
             return False, f"Failed to download the MP4 file: {e}", None
 
-    def extract_mp3_from_mp4(self, mp4_path, video_name):
+    def extract_mp3_from_mp4(self, mp4_path, mp3_path):
         """
         Extracts audio from an MP4 video file and saves it as an MP3 file.
 
@@ -93,7 +91,6 @@ class VideoProcessor:
                 message (str): Description of the result.
                 mp3_path (Path): The path where the audio file was saved.
         """
-        mp3_path = self.get_mp3_save_path(video_name)  # Get the save path for MP3
 
         try:
             print("Start extracting MP3...")
@@ -116,7 +113,7 @@ class VideoProcessor:
 
 
 
-    def download_and_extract_audio(self, url, video_name):
+    def download_and_extract_audio(self, url, video_path, audio_path):
         """
         Downloads an MP4 file and extracts the audio as MP3 in one step.
 
@@ -131,12 +128,12 @@ class VideoProcessor:
                 audio_file_path (Path): The path where the audio file was saved.
         """
         # Download the MP4 file
-        status, message, mp4_path = self.download_mp4(url, video_name)
+        status, message, mp4_path = self.download_mp4(url, video_path)
         if not status:
             return status, message, None  # Return if download fails
         
         # Extract the audio to MP3
-        return self.extract_mp3_from_mp4(mp4_path, video_name)
+        return self.extract_mp3_from_mp4(video_path, audio_path)
 
 """
 def main():
