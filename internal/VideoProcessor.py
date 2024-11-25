@@ -1,9 +1,11 @@
 import requests
-# from moviepy.editor import VideoFileClip
 from internal.FFmpegSetup import FFmpegSetup
 from pathlib import Path
 import os
 import traceback
+import subprocess
+import platform
+
 class VideoProcessor:
     """
     A class for downloading MP4 videos and extracting audio as MP3 files.
@@ -86,34 +88,33 @@ class VideoProcessor:
             video_name (str): The name of the video (used for the MP3 filename).
 
         Returns:
-            tuple: (status, message, audio_file_path)
+            tuple: (status, message, mp3_path)
                 status (bool): True if successful, False otherwise.
                 message (str): Description of the result.
-                audio_file_path (Path): The path where the audio file was saved.
+                mp3_path (Path): The path where the audio file was saved.
         """
         mp3_path = self.get_mp3_save_path(video_name)  # Get the save path for MP3
-        
+
         try:
-            # # Load the video file
-            # video = VideoFileClip(mp4_path)
-            
-            # # Extract the audio and save it as an MP3
-            # video.audio.write_audiofile(mp3_path)
-            print("Start extract mp3...")
-            import subprocess
+            print("Start extracting MP3...")
 
-            # Full path to ffmpeg executable
-            # ffmpeg_path = r'C:\path\to\ffmpeg\bin\ffmpeg.exe'  # Change this to the correct path
+            # Determine the correct command based on the operating system
+            if platform.system().lower() == 'windows':
+                command = [self.ffmpeg_location, '-i', mp4_path, '-vn', '-y', mp3_path]
+            else:
+                command = ['wine', self.ffmpeg_location, '-i', mp4_path, '-vn', '-y', mp3_path]
 
-            # Run ffmpeg command using subprocess
-            print("Start subprocess...")
-            subprocess.call(['wine', self.ffmpeg_location, '-i', mp4_path, '-vn', mp3_path])
-            print("Finish subprocess")
+            print(f"Running command: {' '.join(command)}")
+            subprocess.call(command)
+
+            print("MP3 extraction completed successfully.")
             return True, f"Audio successfully extracted to {mp3_path}.", mp3_path
         except Exception as e:
             print(e)
             traceback.print_exc()
             return False, f"Failed to extract MP3: {e}", None
+
+
 
     def download_and_extract_audio(self, url, video_name):
         """
