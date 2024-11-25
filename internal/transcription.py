@@ -4,7 +4,7 @@ import numpy as np
 import os
 import soundfile as sf
 from pathlib import Path
-
+import tempfile
 from dotenv import load_dotenv
 load_dotenv()
 # Hugging Face API details
@@ -29,7 +29,7 @@ def preprocess_audio(audio_path):
 
     return waveform  # Ensure this is a 1D NumPy array
 
-def split_audio(waveform, chunk_length_seconds=20, overlap_seconds=1):
+def split_audio(waveform, chunk_length_seconds=25, overlap_seconds=1):
     """
     Split audio into overlapping chunks.
     """
@@ -52,37 +52,42 @@ def split_audio(waveform, chunk_length_seconds=20, overlap_seconds=1):
     return chunks
 
 
-def transcribe_chunk(chunk, language='en', filename="downloads/temp_chunk.mp3"):
+def transcribe_chunk(chunk, language='en'):
     """
-    Transcribe a single audio chunk by saving it to a file and sending it to the Hugging Face API.
+    Transcribe a single audio chunk by saving it to a temporary file and sending it to the Hugging Face API.
     
     Args:
         chunk: Audio chunk (numpy array or tensor)
-        filename: Path to save temporary MP3 file
         
     Returns:
         str: Transcribed text from the audio chunk
     """
-    
-
+    # Ensure chunk is a numpy array
     if not isinstance(chunk, np.ndarray):
         chunk_np = chunk.squeeze().numpy()
     else:
         chunk_np = chunk
 
-    # Save the chunk as a temporary WAV file first
-    temp_wav = filename.replace('.mp3', '.wav')
-    sf.write(temp_wav, chunk_np, samplerate=16000)
+    # Create a temporary WAV file
+    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_wav:
+        temp_wav_name = temp_wav.name
+        print("temp_wav_name: ", temp_wav_name)
+        sf.write(temp_wav_name, chunk_np, samplerate=16000)
 
-    with open(temp_wav, "rb") as f:
-        data = f.read()
-    
-    params = {"language": language} #en or th
-    response = requests.post(API_URL, headers=headers, data=data, params=params)
-    response.raise_for_status()
-    result = response.json()
-      
-    return result.get("text", "")
+    try:
+        # Read the temporary file and send to API
+        with open(temp_wav_name, "rb") as f:
+            data = f.read()
+
+        params = {"language": language}  # 'en' or 'th'
+        response = requests.post(API_URL, headers=headers, data=data, params=params)
+        response.raise_for_status()
+        result = response.json()
+
+        return result.get("text", "")
+    finally:
+        # Clean up the temporary file
+        os.remove(temp_wav_name)
 
 def transcribe_audio(audio_path, language='en'):
     """
@@ -94,7 +99,7 @@ def transcribe_audio(audio_path, language='en'):
     print("Finish preprocess_audio")
 
     # Split audio into chunks
-    print("start split_audio")
+    print("Start split_audio")
     audio_chunks = split_audio(waveform)
     print("Finish split_audio")
 
