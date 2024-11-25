@@ -12,8 +12,10 @@ class Summarization(LLMRequest):
 
         chunk_sum = []
         for i,chunk in enumerate(docs):
-            prompt = f"Please summarize this text into one paragraph in the same language as the text and the summarize must be less than 300 words : {chunk}"
-
+            prompt = (
+                        f"Please summarize this text into one paragraph in the same language as the text."
+                        f" The summarize must be less than 200 words : {chunk}"
+                     )
             messages = [
                         {"role": "system", "content": "You are a helpful assistant."},
                         {"role": "user", "content": prompt},
@@ -27,7 +29,7 @@ class Summarization(LLMRequest):
             chunk_sum.append(sum['choices'][0]['message']['content'] )
         
         combine_text = " ".join(chunk_sum)
-        final_prompt = f"please summarize this text into bullet point: {combine_text}"
+        final_prompt = f"Please consider this text as 1 text and summarize it into bullet point: {combine_text}"
         messages = [
                         {"role": "system", "content": "You are a helpful assistant."},
                         {"role": "user", "content": final_prompt},
