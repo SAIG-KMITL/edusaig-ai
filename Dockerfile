@@ -21,7 +21,6 @@ RUN apt update && apt install -y \
     musl-dev \
     ffmpeg \
     libffi-dev \
-    # openssl-dev \
     wine \
     bash \
     curl \
