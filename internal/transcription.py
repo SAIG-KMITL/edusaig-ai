@@ -1,6 +1,4 @@
 import requests
-import torchaudio
-import torch
 import librosa
 import numpy as np
 import os
@@ -19,34 +17,40 @@ def preprocess_audio(audio_path):
     """
     Load and preprocess the audio file using Librosa.
     """
+    # Load audio with librosa
     waveform, sample_rate = librosa.load(audio_path, sr=None)
 
+    # Resample if needed
     if sample_rate != 16000:
         waveform = librosa.resample(waveform, orig_sr=sample_rate, target_sr=16000)
-        sample_rate = 16000
+    # Convert to mono if stereo
+    if waveform.ndim == 2:  # Stereo audio
+        waveform = np.mean(waveform, axis=0)
 
-    if waveform.ndim == 1:  # Mono
-        waveform = np.expand_dims(waveform, axis=0)
-    elif waveform.ndim == 2:  # Stereo
-        waveform = np.mean(waveform, axis=0, keepdims=True)  # Mix down to mono
-
-    waveform = torch.tensor(waveform, dtype=torch.float32)
-
-    return waveform
+    return waveform  # Ensure this is a 1D NumPy array
 
 def split_audio(waveform, chunk_length_seconds=20, overlap_seconds=1):
     """
     Split audio into overlapping chunks.
     """
+    # Convert chunk sizes to samples
     chunk_length_samples = chunk_length_seconds * 16000
     overlap_samples = overlap_seconds * 16000
-    chunks = []
 
-    for start_sample in range(0, waveform.size(1), chunk_length_samples - overlap_samples):
-        end_sample = min(start_sample + chunk_length_samples, waveform.size(1))
-        chunks.append(waveform[:, start_sample:end_sample])
+    # Ensure waveform is a NumPy array
+    if isinstance(waveform, np.ndarray):
+        waveform = waveform  # Already a NumPy array
+    else:
+        raise ValueError("Waveform must be a NumPy array.")
+
+    # Split the waveform into overlapping chunks
+    chunks = []
+    for start_sample in range(0, len(waveform), chunk_length_samples - overlap_samples):
+        end_sample = min(start_sample + chunk_length_samples, len(waveform))
+        chunks.append(waveform[start_sample:end_sample])
 
     return chunks
+
 
 def transcribe_chunk(chunk, language='en', filename="downloads/temp_chunk.mp3"):
     """
