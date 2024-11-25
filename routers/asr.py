@@ -34,7 +34,7 @@ async def asr(body: ASRRequest):
         if status and os.path.exists(temp_audio_path):
             try:
                 # Call the transcription logic
-                transcription = transcribe_audio(temp_audio_path, language=body.language)
+                transcription = transcribe_audio(temp_audio_path, language='en')
 
                 return success_response_status(200, {
                     "transcription": transcription,
