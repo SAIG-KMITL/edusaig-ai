@@ -54,7 +54,7 @@ async def qa(body: PreTestRequest):
                             "content": "User want to be {}. Make **exactly only** ".format(body.occupation.title) + str(amount_per_topic) + " question which are design to be choices question but without the choices, answer and no number index that are about " + str(t) + " in a " + str(diff_titles[n]) + """ difficulty. In array format such as [\"question1\", \"question2\", ...] no need for confirmation message"""
                         }
                     ]
-                print(messages)
+
             elif topic_amount - n == 1:
                 current_topic_amount = max_question - current_amount
                 if current_topic_amount == 1:
@@ -79,7 +79,6 @@ async def qa(body: PreTestRequest):
                             "content": "User want to be {}. Make **exactly only** ".format(body.occupation.title) + str(current_topic_amount) + " question which are design to be choices question but without the choices, answer and no number index that are about " + str(t) + " in a " + str(diff_titles[n]) + """ difficulty. In array format such as [\"question1\", \"question2\", ...] no need for confirmation message"""
                         }
                     ]
-                print(messages)
 
             n = n + 1
             retries = 0
@@ -87,7 +86,6 @@ async def qa(body: PreTestRequest):
                 try:
  
                     response = llm_request.send_request(messages)
-                    # print(response)
 
                     if response:
                         content = response["choices"][0]["message"]["content"]
