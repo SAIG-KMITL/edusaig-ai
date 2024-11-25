@@ -7,3 +7,8 @@ requests
 yt-dlp
 ffmpeg-python
 moviepy
+transformers 
+librosa
+numpy
+soundfile
+fastapi
