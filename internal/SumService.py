@@ -13,8 +13,10 @@ class Summarization(LLMRequest):
         chunk_sum = []
         for i,chunk in enumerate(docs):
             prompt = (
-                        f"Please summarize this text into one paragraph in the same language as the text."
-                        f" The summarize must be less than 200 words : {chunk}"
+                        "Please summarize the following text into one concise paragraph"
+                        "The summary should focus solely on the educational content and ignore irrelevant topics such as promotions or unrelated discussions. "
+                        "The text must be less than 200 words."
+                        f"Text: {chunk}"
                      )
             messages = [
                         {"role": "system", "content": "You are a helpful assistant."},
@@ -24,7 +26,8 @@ class Summarization(LLMRequest):
             if(not sum):
                print(f"Fail to summarize chunk {i}. Can not continue process.")
                return None
-            #print(sum)
+            #print(len(sum['choices'][0]['message']['content']))
+
             print(f"chunk {i} done")
             chunk_sum.append(sum['choices'][0]['message']['content'] )
         
@@ -34,6 +37,7 @@ class Summarization(LLMRequest):
                         {"role": "system", "content": "You are a helpful assistant."},
                         {"role": "user", "content": final_prompt},
         ]
+
         final_sum = self.send_request(messages)
         if(final_sum):
             print(final_sum['choices'][0]['message']['content'])
