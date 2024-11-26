@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  app:
+    container_name: edusaig-ai
+    image: edusaig-ai
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - TZ=Asia/Bangkok
+    ports:
+      - 8000:8000

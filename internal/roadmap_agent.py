@@ -19,7 +19,7 @@ class AgentState(TypedDict):
 # Initialize LLM
 llm = ChatOpenAI(
   model=os.getenv('SAIG_LLM_MODEL'),
-  base_url=os.getenv('LLM_SAIG_API'),
+  base_url=os.getenv('SAIG_LLM_URL_LANGCHAIN'),
   api_key="NA",
   temperature=0.6,
   max_tokens=2048,
@@ -188,7 +188,7 @@ def create_roadmap_validator_agent():
         {json.dumps(state['roadmap'], indent=2)}
 
         **Validation Requirements:**
-        1. Course Sequence
+        1. Course Sequence:
         - Order courses from foundational to advanced concepts
         - Ensure prerequisites are completed before advanced topics
         - Group related concepts together
@@ -230,11 +230,12 @@ def create_roadmap_validator_agent():
         **Important:**
         - Maintain exact JSON structure
         - Duration should be in minutes
+        - Limit the roadmap to a maximum of 8 courses
         - Status should be "published" for all courses
         - Learning path should join course titles with " → "
         - Ensure course order reflects real-world learning progression
         - Verify total duration is realistic and matches sum of course durations
-        - Provide clear path description explaining the learning journey
+        - Provide clear path description explaining the learning journey     
         - Do not include any additional text outside the START_JSON and END_JSON delimiters
         """
 
