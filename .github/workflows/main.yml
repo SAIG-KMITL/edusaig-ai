@@ -21,6 +21,7 @@ jobs:
                 echo "SAIG_LLM_MODEL=${{ secrets.SAIG_LLM_MODEL }}" >> .env
                 echo "HUGGING_FACE_API_KEY=${{ secrets.HUGGING_FACE_API_KEY }}" >> .env
                 echo "HUGGING_FACE_ASR_MODEL=${{ secrets.HUGGING_FACE_ASR_MODEL }}" >> .env
+                echo "SAIG_LLM_URL_LANGCHAIN =${{ secrets.SAIG_LLM_URL_LANGCHAIN  }}" >> .env
                 cat .env
               
             - name: Running Docker Compose
