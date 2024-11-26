@@ -18,7 +18,7 @@ class AgentState(TypedDict):
 
 # Initialize LLM
 llm = ChatOpenAI(
-  model=os.getenv('MODEL'),
+  model=os.getenv('SAIG_LLM_MODEL'),
   base_url=os.getenv('LLM_SAIG_API'),
   api_key="NA",
   temperature=0.6,
