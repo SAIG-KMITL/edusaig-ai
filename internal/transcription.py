@@ -1,12 +1,10 @@
 import requests
-import torchaudio
-import torch
 import librosa
 import numpy as np
 import os
 import soundfile as sf
 from pathlib import Path
-
+import tempfile
 from dotenv import load_dotenv
 load_dotenv()
 # Hugging Face API details
@@ -19,66 +17,81 @@ def preprocess_audio(audio_path):
     """
     Load and preprocess the audio file using Librosa.
     """
+    # Load audio with librosa
     waveform, sample_rate = librosa.load(audio_path, sr=None)
 
+    # Resample if needed
     if sample_rate != 16000:
         waveform = librosa.resample(waveform, orig_sr=sample_rate, target_sr=16000)
-        sample_rate = 16000
+    # Convert to mono if stereo
+    if waveform.ndim == 2:  # Stereo audio
+        waveform = np.mean(waveform, axis=0)
 
-    if waveform.ndim == 1:  # Mono
-        waveform = np.expand_dims(waveform, axis=0)
-    elif waveform.ndim == 2:  # Stereo
-        waveform = np.mean(waveform, axis=0, keepdims=True)  # Mix down to mono
+    return waveform  # Ensure this is a 1D NumPy array
 
-    waveform = torch.tensor(waveform, dtype=torch.float32)
-
-    return waveform
-
-def split_audio(waveform, chunk_length_seconds=20, overlap_seconds=1):
+def split_audio(waveform, chunk_length_seconds=25, overlap_seconds=1):
     """
     Split audio into overlapping chunks.
     """
+    # Convert chunk sizes to samples
     chunk_length_samples = chunk_length_seconds * 16000
     overlap_samples = overlap_seconds * 16000
-    chunks = []
 
-    for start_sample in range(0, waveform.size(1), chunk_length_samples - overlap_samples):
-        end_sample = min(start_sample + chunk_length_samples, waveform.size(1))
-        chunks.append(waveform[:, start_sample:end_sample])
+    # Ensure waveform is a NumPy array
+    if isinstance(waveform, np.ndarray):
+        waveform = waveform  # Already a NumPy array
+    else:
+        raise ValueError("Waveform must be a NumPy array.")
+
+    # Split the waveform into overlapping chunks
+    chunks = []
+    for start_sample in range(0, len(waveform), chunk_length_samples - overlap_samples):
+        end_sample = min(start_sample + chunk_length_samples, len(waveform))
+        chunks.append(waveform[start_sample:end_sample])
 
     return chunks
 
-def transcribe_chunk(chunk, language='en', filename="downloads/temp_chunk.mp3"):
+
+def transcribe_chunk(chunk, language='en'):
     """
-    Transcribe a single audio chunk by saving it to a file and sending it to the Hugging Face API.
+    Transcribe a single audio chunk by saving it to a temporary file and sending it to the Hugging Face API.
     
     Args:
         chunk: Audio chunk (numpy array or tensor)
-        filename: Path to save temporary MP3 file
         
     Returns:
         str: Transcribed text from the audio chunk
     """
-    
-
+    # Ensure chunk is a numpy array
     if not isinstance(chunk, np.ndarray):
         chunk_np = chunk.squeeze().numpy()
     else:
         chunk_np = chunk
 
-    # Save the chunk as a temporary WAV file first
-    temp_wav = filename.replace('.mp3', '.wav')
-    sf.write(temp_wav, chunk_np, samplerate=16000)
+    # Specify the custom temporary directory
+    custom_temp_dir = "downloads/"
+    os.makedirs(custom_temp_dir, exist_ok=True)
 
-    with open(temp_wav, "rb") as f:
-        data = f.read()
-    
-    params = {"language": language} #en or th
-    response = requests.post(API_URL, headers=headers, data=data, params=params)
-    response.raise_for_status()
-    result = response.json()
-      
-    return result.get("text", "")
+    # Create a temporary WAV file
+    with tempfile.NamedTemporaryFile(suffix=".wav", dir=custom_temp_dir, delete=False) as temp_wav:
+        temp_wav_name = temp_wav.name
+        print("temp_wav_name: ", temp_wav_name)
+        sf.write(temp_wav_name, chunk_np, samplerate=16000)
+
+    try:
+        # Read the temporary file and send to API
+        with open(temp_wav_name, "rb") as f:
+            data = f.read()
+
+        params = {"language": language}  # 'en' or 'th'
+        response = requests.post(API_URL, headers=headers, data=data, params=params)
+        response.raise_for_status()
+        result = response.json()
+
+        return result.get("text", "")
+    finally:
+        # Clean up the temporary file
+        os.remove(temp_wav_name)
 
 def transcribe_audio(audio_path, language='en'):
     """
@@ -90,7 +103,7 @@ def transcribe_audio(audio_path, language='en'):
     print("Finish preprocess_audio")
 
     # Split audio into chunks
-    print("start split_audio")
+    print("Start split_audio")
     audio_chunks = split_audio(waveform)
     print("Finish split_audio")
 
