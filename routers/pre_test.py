@@ -40,7 +40,7 @@ async def qa(body: PreTestRequest):
                         },
                         {
                             "role": "user",
-                            "content": "User want to be {}. Make **exactly only** ".format(body.occupation.title) + str(amount_per_topic) + " question which are design to be choices question but without the choices, answer and no number index that are about " + str(t) + " in a " + str(diff_titles[n]) + """ difficulty. In array format such as [\"question1\"] no need for confirmation message"""
+                            "content": "User want to be {}. Make **exactly only** ".format(body.occupation.title) + str(amount_per_topic) + " question which are design to be choices question but without the choices, answer and no number index that test the understanding of " + str(t) + " concepts in a " + str(diff_titles[n]) + """ difficulty. In array format such as [\"question1\"] no need for confirmation message"""
                         }
                     ]
                 else:
@@ -51,7 +51,7 @@ async def qa(body: PreTestRequest):
                         },
                         {
                             "role": "user",
-                            "content": "User want to be {}. Make **exactly only** ".format(body.occupation.title) + str(amount_per_topic) + " question which are design to be choices question but without the choices, answer and no number index that are about " + str(t) + " in a " + str(diff_titles[n]) + """ difficulty. In array format such as [\"question1\", \"question2\", ...] no need for confirmation message"""
+                            "content": "User want to be {}. Make **exactly only** ".format(body.occupation.title) + str(amount_per_topic) + " question which are design to be choices question but without the choices, answer and no number index that test the understanding of " + str(t) + " concepts in a " + str(diff_titles[n]) + """ difficulty. In array format such as [\"question1\", \"question2\", ...] no need for confirmation message"""
                         }
                     ]
 
@@ -65,7 +65,7 @@ async def qa(body: PreTestRequest):
                     },
                     {
                         "role": "user",
-                        "content": "User want to be {}. Make **exactly only** ".format(body.occupation.title) + str(current_topic_amount) + " question which are design to be choices question but without the choices, answer and no number index that are about " + str(t) + " in a " + str(diff_titles[n]) + """ difficulty. In array format such as [\"question1\"] no need for confirmation message"""
+                        "content": "User want to be {}. Make **exactly only** ".format(body.occupation.title) + str(current_topic_amount) + " question which are design to be choices question but without the choices, answer and no number index that test the understanding of " + str(t) + " concepts in a " + str(diff_titles[n]) + """ difficulty. In array format such as [\"question1\"] no need for confirmation message"""
                     }
                 ]
                 else:
@@ -76,7 +76,7 @@ async def qa(body: PreTestRequest):
                         },
                         {
                             "role": "user",
-                            "content": "User want to be {}. Make **exactly only** ".format(body.occupation.title) + str(current_topic_amount) + " question which are design to be choices question but without the choices, answer and no number index that are about " + str(t) + " in a " + str(diff_titles[n]) + """ difficulty. In array format such as [\"question1\", \"question2\", ...] no need for confirmation message"""
+                            "content": "User want to be {}. Make **exactly only** ".format(body.occupation.title) + str(current_topic_amount) + " question which are design to be choices question but without the choices, answer and no number index that test the understanding of " + str(t) + " concepts in a " + str(diff_titles[n]) + """ difficulty. In array format such as [\"question1\", \"question2\", ...] no need for confirmation message"""
                         }
                     ]
 
