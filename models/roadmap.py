@@ -26,7 +26,7 @@ class Course(BaseModel):
   id: str
   title: str
   description: str
-  thumbnailKey: str
+  thumbnail: str
   duration: int
   level: str
   price: float
@@ -35,7 +35,6 @@ class Course(BaseModel):
   updatedAt: datetime
   teacher: Teacher
   category: Category
-  teacherId: str
 
 class RoadMapGeneratorRequest(BaseModel):
   user_data: Dict[str, Any]
@@ -63,7 +62,7 @@ class RoadMapGeneratorRequest(BaseModel):
                       "id": "fa51a450-f8b0-42a3-93f4-cc780b1cc5d8",
                       "title": "Introduction to Programming",
                       "description": "This course is an introduction to programming",
-                      "thumbnailKey": "https://www.example.com/thumbnail.jpg",
+                      "thumbnail": "https://www.example.com/thumbnail.jpg",
                       "duration": 60,
                       "level": "beginner",
                       "price": 100,
@@ -80,9 +79,8 @@ class RoadMapGeneratorRequest(BaseModel):
                           "points": 0,
                           "createdAt": "2024-11-13T16:14:55.623Z",
                           "updatedAt": "2024-11-13T16:14:55.623Z",
-                          "profileKey": "None"
+                          "profileKey": None
                       },
-                      "teacherId": "teacherId-123",
                       "category": {
                           "id": "122ec4ae-5e82-481a-9711-ec974224ac7b",
                           "title": "javascript",
