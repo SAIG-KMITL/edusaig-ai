@@ -22,6 +22,7 @@ async def qa(body: PreTestRequest):
     response_topic = body.topics
     topic_titles = [topic.title for topic in response_topic]
     topic_amount = len(topic_titles)
+    amount_per_topic = round(max_question / topic_amount)
     diff_titles = [diff.level for diff in response_topic]
     current_amount = 0
     n = 0
@@ -29,7 +30,6 @@ async def qa(body: PreTestRequest):
     final_questions = []
     final_json = []
     if topic_titles:
-        amount_per_topic = round(max_question / topic_amount)
         for t in topic_titles:
             if topic_amount - n != 1:
                 if amount_per_topic == 1:
