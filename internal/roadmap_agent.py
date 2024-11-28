@@ -316,12 +316,15 @@ def validated_roadmap_course(courses: List[Any], validated_roadmap: List[Dict[st
     seen_ids = set()
     unique_courses = []
     total_duration = 0
+    current_priority = 1
 
     for course in validated_roadmap:
         if course["id"] in valid_course_ids and course["id"] not in seen_ids:
+            course['priority'] = current_priority
             unique_courses.append(course)
             seen_ids.add(course["id"])
             total_duration += course["duration"]
+            current_priority+=1
 
     return unique_courses, total_duration
 
