@@ -27,7 +27,6 @@ class Course(BaseModel):
   title: str
   description: str
   thumbnailKey: str
-  teacherId: str
   duration: int
   level: str
   price: float
@@ -64,7 +63,6 @@ class RoadMapGeneratorRequest(BaseModel):
                       "title": "Introduction to Programming",
                       "description": "This course is an introduction to programming",
                       "thumbnailKey": "https://www.example.com/thumbnail.jpg",
-                      "teacherId": "teacherId-123",
                       "duration": 60,
                       "level": "beginner",
                       "price": 100,
