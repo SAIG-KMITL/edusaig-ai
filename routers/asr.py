@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from utils.response import success_response_status, error_response_status
-from internal.transcription import transcribe_audio
+from internal.transcription import transcribe_audio, transcribe_audio_multiprocess
 from models.asr import ASRRequest
 from internal.VideoProcessor import VideoProcessor
 import os
@@ -34,7 +34,7 @@ async def asr(body: ASRRequest):
         if status and os.path.exists(temp_audio_path):
             try:
                 # Call the transcription logic
-                transcription = transcribe_audio(temp_audio_path, language='en')
+                transcription = transcribe_audio_multiprocess(temp_audio_path, language='en')
 
                 return success_response_status(200, {
                     "transcription": transcription,
