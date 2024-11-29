@@ -7,6 +7,8 @@ from routers import mock_qa
 from routers import asr
 from routers import roadmap
 from routers import Summarize
+from internal.FFmpegSetup import manual_setup_ffmpeg
+manual_setup_ffmpeg()
 
 app = FastAPI(openapi_prefix="/ai")
 app.add_middleware(
