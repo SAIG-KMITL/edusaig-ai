@@ -1,6 +1,7 @@
+from tqdm import tqdm
+import requests
 import os
 import sys
-import requests
 import zipfile
 from pathlib import Path
 import shutil
@@ -8,19 +9,33 @@ import shutil
 class FFmpegSetup:
     def __init__(self):
         self.ffmpeg_url = "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip"
-        self.chunk_size = 8192
+        self.chunk_size = 65536
 
     def download_ffmpeg(self, download_path):
-        """Download FFmpeg archive."""
+        """Download FFmpeg archive with a progress bar."""
         try:
             print("Downloading FFmpeg...")
+
+            # Send a HEAD request to get the total file size
+            response = requests.head(self.ffmpeg_url, allow_redirects=True)
+            total_size = int(response.headers.get("content-length", 0))
+            
+            # Download with streaming and progress bar
             response = requests.get(self.ffmpeg_url, stream=True)
             response.raise_for_status()
             
-            with open(download_path, "wb") as file:
+            with open(download_path, "wb") as file, tqdm(
+                desc="Downloading",
+                total=total_size,
+                unit="B",
+                unit_scale=True,
+                unit_divisor=1024,
+            ) as bar:
                 for chunk in response.iter_content(chunk_size=self.chunk_size):
                     if chunk:
                         file.write(chunk)
+                        bar.update(len(chunk))
+            
             print("Download completed.")
             return True
         except Exception as e:
@@ -89,3 +104,9 @@ class FFmpegSetup:
         print(f"FFmpeg setup completed in: {ffmpeg_dir}")
         
         return ffmpeg_dir
+    
+def manual_setup_ffmpeg():
+    script_dir = Path(__file__).parent # edusaig-ai\internal
+    ffmpeg_setup = FFmpegSetup()
+    setup_location = ffmpeg_setup.setup_ffmpeg(script_dir) 
+    print("Done manual_setup_ffmpeg(): ", setup_location)
