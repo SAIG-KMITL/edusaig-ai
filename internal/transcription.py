@@ -6,10 +6,13 @@ import soundfile as sf
 from pathlib import Path
 import tempfile
 from dotenv import load_dotenv
+import multiprocessing
+from functools import partial
+
 load_dotenv()
 # Hugging Face API details
-API_URL = os.getenv("HUGGING_FACE_ASR_MODEL") # "https://api-inference.huggingface.co/models/openai/whisper-large-v3-turbo"
-API_KEY = os.getenv("HUGGING_FACE_API_KEY")  # Replace with your actual API key
+API_URL = os.getenv("HUGGING_FACE_ASR_MODEL")
+API_KEY = os.getenv("HUGGING_FACE_API_KEY")
 
 headers = {"Authorization": f"Bearer {API_KEY}"}
 
@@ -23,11 +26,12 @@ def preprocess_audio(audio_path):
     # Resample if needed
     if sample_rate != 16000:
         waveform = librosa.resample(waveform, orig_sr=sample_rate, target_sr=16000)
+    
     # Convert to mono if stereo
     if waveform.ndim == 2:  # Stereo audio
         waveform = np.mean(waveform, axis=0)
 
-    return waveform  # Ensure this is a 1D NumPy array
+    return waveform
 
 def split_audio(waveform, chunk_length_seconds=25, overlap_seconds=1):
     """
@@ -38,9 +42,7 @@ def split_audio(waveform, chunk_length_seconds=25, overlap_seconds=1):
     overlap_samples = overlap_seconds * 16000
 
     # Ensure waveform is a NumPy array
-    if isinstance(waveform, np.ndarray):
-        waveform = waveform  # Already a NumPy array
-    else:
+    if not isinstance(waveform, np.ndarray):
         raise ValueError("Waveform must be a NumPy array.")
 
     # Split the waveform into overlapping chunks
@@ -51,16 +53,9 @@ def split_audio(waveform, chunk_length_seconds=25, overlap_seconds=1):
 
     return chunks
 
-
 def transcribe_chunk(chunk, language='en'):
     """
     Transcribe a single audio chunk by saving it to a temporary file and sending it to the Hugging Face API.
-    
-    Args:
-        chunk: Audio chunk (numpy array or tensor)
-        
-    Returns:
-        str: Transcribed text from the audio chunk
     """
     # Ensure chunk is a numpy array
     if not isinstance(chunk, np.ndarray):
@@ -75,7 +70,6 @@ def transcribe_chunk(chunk, language='en'):
     # Create a temporary WAV file
     with tempfile.NamedTemporaryFile(suffix=".wav", dir=custom_temp_dir, delete=False) as temp_wav:
         temp_wav_name = temp_wav.name
-        print("temp_wav_name: ", temp_wav_name)
         sf.write(temp_wav_name, chunk_np, samplerate=16000)
 
     try:
@@ -83,7 +77,7 @@ def transcribe_chunk(chunk, language='en'):
         with open(temp_wav_name, "rb") as f:
             data = f.read()
 
-        params = {"language": language}  # 'en' or 'th'
+        params = {"language": language} # 'en' or 'th'
         response = requests.post(API_URL, headers=headers, data=data, params=params)
         response.raise_for_status()
         result = response.json()
@@ -92,6 +86,46 @@ def transcribe_chunk(chunk, language='en'):
     finally:
         # Clean up the temporary file
         os.remove(temp_wav_name)
+
+def transcribe_audio_multiprocess(audio_path, language='en', max_workers=4):
+    """
+    Transcribe an audio file using Hugging Face Whisper API with multiprocessing.
+    
+    Args:
+        audio_path (str): Path to the audio file
+        language (str, optional): Language of the audio. Defaults to 'en'.
+        max_workers (int, optional): Maximum number of worker processes. 
+                                     Defaults to None (uses number of CPU cores).
+    
+    Returns:
+        str: Full transcription of the audio
+    """
+    # Preprocess the audio
+    print("Start preprocess_audio")
+    waveform = preprocess_audio(audio_path)
+    print("Finish preprocess_audio")
+
+    # Split audio into chunks
+    print("Start split_audio")
+    audio_chunks = split_audio(waveform)
+    print("Finish split_audio")
+
+    # If max_workers not specified, use number of CPU cores
+    if max_workers is None:
+        max_workers = multiprocessing.cpu_count()
+
+    # Create a partial function with fixed language
+    transcribe_chunk_partial = partial(transcribe_chunk, language=language)
+
+    # Use multiprocessing to transcribe chunks
+    print(f"Transcribing with {max_workers} workers...")
+    with multiprocessing.Pool(processes=max_workers) as pool:
+        # Map the transcription function to all chunks
+        transcriptions = pool.map(transcribe_chunk_partial, audio_chunks)
+
+    # Combine all transcriptions
+    full_transcription = " ".join(filter(bool, transcriptions))
+    return full_transcription
 
 def transcribe_audio(audio_path, language='en'):
     """
